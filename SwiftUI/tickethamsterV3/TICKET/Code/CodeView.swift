@@ -97,11 +97,20 @@ struct CodeView: View {
                 }
 
                 ZStack {
-                    Color(red: 0.86, green: 0.86, blue: 0.86)
-
                     barcodeImage
                         .padding(.horizontal, 10)
                         .padding(.vertical, 5)
+
+                    Rectangle()
+                        .frame(width: 12, height: 68)
+                        .frame(maxWidth: .infinity, alignment: animation ? .trailing : .leading)
+                        .foregroundStyle(Color(red: 0.12, green: 0.56, blue: 0.98).opacity(0.55))
+                        .animation(
+                            .linear(duration: 1.5)
+                                .repeatForever(autoreverses: true)
+                                .delay(0.13),
+                            value: animation
+                        )
 
                     Rectangle()
                         .frame(width: 4, height: 88)
