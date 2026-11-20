@@ -302,37 +302,12 @@ struct TicketsView: View {
         .disabled(!isEnabled)
     }
 
-    @ViewBuilder
     private var eventHeroImage: some View {
-        if let urlString = eventVM.event?.eventIMG,
-           let url = URL(string: urlString),
-           !urlString.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .empty:
-                    ZStack {
-                        Color(red: 0.13, green: 0.13, blue: 0.13)
-                        ProgressView().tint(.white)
-                    }
-                case .success(let image):
-                    image
-                        .resizable()
-                        .scaledToFill()
-                case .failure:
-                    fallbackHero
-                @unknown default:
-                    fallbackHero
-                }
-            }
-        } else {
-            fallbackHero
-        }
-    }
-
-    private var fallbackHero: some View {
-        Image("event2")
-            .resizable()
-            .scaledToFill()
+        OfflineCachedImage(
+            urlString: eventVM.event?.eventIMG ?? "",
+            fallbackAsset: "event2",
+            contentMode: .fill
+        )
     }
 
     private var firstPage: Page? {
