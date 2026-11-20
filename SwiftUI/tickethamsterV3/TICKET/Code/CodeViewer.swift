@@ -1,22 +1,11 @@
-//
-//  CodeViewer.swift
-//  tickethamsterV3
-//
-//  Created by Eduardo Jimenez on 21/10/24.
-//
-
 import SwiftUI
 
 struct CodeViewer: View {
 
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.presentationMode) private var presentationMode
 
     @Binding var pages: [Page]
-
-    // ✅ Guardamos el índice inicial “real”
     private let initialIndex: Int
-
-    // ✅ Índice actual del TabView
     @State private var codeIndex: Int = 0
 
     init(pages: Binding<[Page]>, initialIndex: Int = 0) {
@@ -26,99 +15,75 @@ struct CodeViewer: View {
     }
 
     var body: some View {
-
         ZStack {
+            Color.black.ignoresSafeArea()
 
-            // ✅ FOOTER (como antes: NO empuja el layout)
-            Rectangle()
-                .frame(width: 440, height: 100)
-                .padding(.top, 840)
-                .foregroundColor(Color("nHead"))
+            VStack(spacing: 0) {
+                header
 
-            TabView(selection: $codeIndex) {
-                ForEach(Array(pages.enumerated()), id: \.element.id) { index, page in
-                    VStack {
-                        Spacer()
-
+                TabView(selection: $codeIndex) {
+                    ForEach(Array(pages.enumerated()), id: \.element.id) { index, page in
                         CodeView(page: page)
-                            .padding(.bottom, 30)
-
-                        if pages.count <= 1 {
-                            Text("1 de 1")
-                                .foregroundColor(.white)
-                                .padding(.bottom, 8)
-                        } else {
-                            Text("\(safeDisplayIndex) de \(pages.count)")
-                                .foregroundColor(.white)
-                                .padding(.bottom, 8)
-                        }
-                    }
-                    .tag(index)
-                }
-            }
-            // ✅ Esto ayuda cuando SwiftUI reusa la vista: “resetea” el TabView si cambia el índice inicial
-            .id(initialIndex)
-            .tabViewStyle(.page(indexDisplayMode: .never))
-            .animation(.easeInOut, value: codeIndex)
-            .gesture(DragGesture()) // 🔒 bloquea swipe
-        }
-
-        // 🔺 HEAD
-        .overlay {
-            ZStack {
-
-                Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                    Color("nHead")
-                        .frame(width: 600, height: 112)
-                        .background(.ultraThinMaterial)
-                        .blur(radius: 0.5)
-                        .edgesIgnoringSafeArea(.top)
-                }
-                .frame(maxHeight: .infinity, alignment: .top)
-
-                ZStack(alignment: .leading) {
-
-                    Image(systemName: "multiply")
-                        .foregroundColor(.white)
-                        .font(.system(size: 20))
-                        .padding(.trailing, 350)
-                        .padding(.top, 16)
-
-                    if let currentPage = currentPage {
-                        Text(currentPage.tx6.firebaseLineBreaks)
-                            .fontWeight(.medium)
-                            .bold()
-                            .font(.custom("Lexend", size: 15))
-                            .foregroundColor(.white)
-                            .padding(.leading, 35)
-
-                        Text(currentPage.tx7.firebaseLineBreaks)
-                            .fontWeight(.medium)
-                            .bold()
-                            .font(.custom("Lexend", size: 12))
-                            .foregroundColor(.white)
-                            .padding(.top, 32)
-                            .padding(.leading, 35)
+                            .tag(index)
                     }
                 }
-                .padding(.bottom, 825)
+                .id(initialIndex)
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .animation(.easeInOut, value: codeIndex)
+
+                Text("\(safeDisplayIndex) de \(max(pages.count, 1))")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .padding(.vertical, 8)
             }
         }
-        .frame(maxHeight: .infinity, alignment: .top)
+        .preferredColorScheme(.dark)
         .onAppear {
             syncToInitialIndex()
-            print("✅ CodeViewer pages.count =", pages.count, "initialIndex =", initialIndex, "codeIndex =", codeIndex)
         }
         .onChange(of: pages.count) { _ in
-            // cuando llegan datos del listener, re-sincroniza el index
             syncToInitialIndex()
         }
     }
 
-    // MARK: - Helpers
+    private var header: some View {
+        HStack(alignment: .center, spacing: 12) {
+            Button {
+                presentationMode.wrappedValue.dismiss()
+            } label: {
+                Image(systemName: "arrow.left")
+                    .font(.system(size: 24, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 44, height: 44)
+            }
+            .buttonStyle(.plain)
+
+            Spacer(minLength: 8)
+
+            if let page = currentPage {
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(page.tx7.firebaseLineBreaks)
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.72)
+
+                    Text(venueLine(for: page))
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.9))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.72)
+                }
+            }
+        }
+        .padding(.horizontal, 18)
+        .padding(.top, 8)
+        .padding(.bottom, 8)
+        .background(Color.black)
+    }
 
     private var safeDisplayIndex: Int {
-        guard pages.count > 0 else { return 0 }
+        guard !pages.isEmpty else { return 0 }
         return min(max(codeIndex + 1, 1), pages.count)
     }
 
@@ -128,16 +93,26 @@ struct CodeViewer: View {
         return pages[safeIndex]
     }
 
+    private func venueLine(for page: Page) -> String {
+        let place = page.place.trimmingCharacters(in: .whitespacesAndNewlines)
+        let city = page.city.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if !place.isEmpty && !city.isEmpty {
+            return "\(place) • \(city)".firebaseLineBreaks
+        }
+        if !place.isEmpty { return place.firebaseLineBreaks }
+        if !city.isEmpty { return city.firebaseLineBreaks }
+        return page.tx6.firebaseLineBreaks
+    }
+
     private func syncToInitialIndex() {
         guard !pages.isEmpty else {
             codeIndex = 0
             return
         }
-        let clamped = min(max(initialIndex, 0), pages.count - 1)
-        codeIndex = clamped
+        codeIndex = min(max(initialIndex, 0), pages.count - 1)
     }
 }
-
 
 #Preview {
     StatefulPreviewWrapper(Page.samplePages) { pages in
@@ -145,13 +120,16 @@ struct CodeViewer: View {
     }
 }
 
-// Helper solo para preview
 struct StatefulPreviewWrapper<Value, Content: View>: View {
     @State var value: Value
     let content: (Binding<Value>) -> Content
+
     init(_ value: Value, content: @escaping (Binding<Value>) -> Content) {
         _value = State(initialValue: value)
         self.content = content
     }
-    var body: some View { content($value) }
+
+    var body: some View {
+        content($value)
+    }
 }
