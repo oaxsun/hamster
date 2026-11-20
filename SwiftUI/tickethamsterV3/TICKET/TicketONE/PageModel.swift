@@ -76,11 +76,17 @@ private final class HamsterRemoteImageLoader: ObservableObject {
         task?.cancel()
         didFail = false
 
-        guard
-            let url = URL(string: urlString),
-            !urlString.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        else {
-            image = nil
+        let cleanURLString = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // EventViewModel can publish an empty value first and the real URL a moment later.
+        // Do not turn that transient empty state into a permanent fallback.
+        guard !cleanURLString.isEmpty else {
+            currentURL = nil
+            return
+        }
+
+        guard let url = URL(string: cleanURLString) else {
+            currentURL = nil
             didFail = true
             return
         }
@@ -155,10 +161,7 @@ struct OfflineCachedImage: View {
                 }
             }
         }
-        .onAppear {
-            loader.load(urlString: urlString)
-        }
-        .onChange(of: urlString) { _ in
+        .task(id: urlString) {
             loader.load(urlString: urlString)
         }
     }
