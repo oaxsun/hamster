@@ -11,7 +11,7 @@ struct CodeView: View {
     var body: some View {
         VStack(spacing: 0) {
             dynamicTicket
-                .padding(.horizontal, 0)
+                .padding(.horizontal, 36)
 
             bottomActions
                 .padding(.top, 28)
@@ -35,7 +35,7 @@ struct CodeView: View {
     private var dynamicTicket: some View {
         GeometryReader { geometry in
             let width = geometry.size.width
-            let infoWidth = width * 0.82
+            let infoWidth = width
 
             ZStack(alignment: .top) {
                 safeBackground
