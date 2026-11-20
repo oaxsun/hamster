@@ -1,21 +1,23 @@
-//
-//  tickethamsterV3App.swift
-//  tickethamsterV3
-//
-//  Created by Eduardo Wolffel on 17/10/24.
-//
-
 import SwiftUI
-import FirebaseCore   // importante: este es el módulo de inicialización
+import FirebaseCore
+import FirebaseFirestore
 
 @main
 struct tickethamsterV3App: App {
-    
-    // inicializador de la App
+
     init() {
         FirebaseApp.configure()
+
+        // Persistent Firestore cache for offline use.
+        // Firestore will serve the last cached data while offline and
+        // snapshot listeners will refresh automatically when connectivity returns.
+        let settings = FirestoreSettings()
+        settings.cacheSettings = PersistentCacheSettings(
+            sizeBytes: 100 * 1024 * 1024 as NSNumber
+        )
+        Firestore.firestore().settings = settings
     }
-    
+
     var body: some Scene {
         WindowGroup {
             ContentView()
