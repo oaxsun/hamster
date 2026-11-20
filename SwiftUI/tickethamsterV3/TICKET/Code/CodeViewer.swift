@@ -47,33 +47,39 @@ struct CodeViewer: View {
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 12) {
-            Button {
-                presentationMode.wrappedValue.dismiss()
-            } label: {
-                Image(systemName: "arrow.left")
-                    .font(.system(size: 24, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 44, height: 44)
-            }
-            .buttonStyle(.plain)
-
-            Spacer(minLength: 8)
-
+        ZStack {
             if let page = currentPage {
-                VStack(alignment: .trailing, spacing: 4) {
+                VStack(alignment: .center, spacing: 4) {
                     Text(page.tx7.firebaseLineBreaks)
                         .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
                         .lineLimit(1)
                         .minimumScaleFactor(0.72)
 
                     Text(venueLine(for: page))
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(.white.opacity(0.9))
+                        .multilineTextAlignment(.center)
                         .lineLimit(1)
                         .minimumScaleFactor(0.72)
                 }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.horizontal, 72)
+            }
+
+            HStack {
+                Button {
+                    presentationMode.wrappedValue.dismiss()
+                } label: {
+                    Image(systemName: "arrow.left")
+                        .font(.system(size: 24, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 44, height: 44)
+                }
+                .buttonStyle(.plain)
+
+                Spacer()
             }
         }
         .padding(.horizontal, 18)
