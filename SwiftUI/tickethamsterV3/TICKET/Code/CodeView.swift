@@ -241,67 +241,22 @@ struct CodeView: View {
 
     // MARK: - SafeIMG como fondo
 
-    @ViewBuilder
     private var safeBackground: some View {
-        if let url = URL(string: page.safeUrl),
-           !page.safeUrl.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .empty:
-                    ZStack {
-                        Color(red: 0.68, green: 0.66, blue: 0.66)
-                        ProgressView().tint(.white)
-                    }
-                case .success(let image):
-                    image
-                        .resizable()
-                        .scaledToFill()
-                case .failure:
-                    fallbackSafeBackground
-                @unknown default:
-                    fallbackSafeBackground
-                }
-            }
-        } else {
-            fallbackSafeBackground
-        }
-    }
-
-    private var fallbackSafeBackground: some View {
-        Image("safeSample")
-            .resizable()
-            .scaledToFill()
+        OfflineCachedImage(
+            urlString: page.safeUrl,
+            fallbackAsset: "safeSample",
+            contentMode: .fill
+        )
     }
 
     // MARK: - Barcode
 
-    @ViewBuilder
     private var barcodeImage: some View {
-        if let url = URL(string: page.barcodeUrl),
-           !page.barcodeUrl.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .empty:
-                    ProgressView().tint(.black)
-                case .success(let image):
-                    image
-                        .resizable()
-                        .scaledToFit()
-                case .failure:
-                    fallbackBarcode
-                @unknown default:
-                    fallbackBarcode
-                }
-            }
-        } else {
-            fallbackBarcode
-        }
-    }
-
-    private var fallbackBarcode: some View {
-        Image("codeSample")
-            .resizable()
-            .scaledToFit()
+        OfflineCachedImage(
+            urlString: page.barcodeUrl,
+            fallbackAsset: "codeSample",
+            contentMode: .fit
+        )
     }
 
     private func openWallet() {
