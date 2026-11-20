@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0d0d0f" />
+  <title>Hamster Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="login" class="login-shell">
+    <form id="loginForm" class="login-card">
+      <div class="brand-mark">H</div>
+      <h1>Hamster Panel</h1>
+      <p>Administra el contenido de la app sin entrar a Firebase.</p>
+      <label>Email<input id="email" type="email" autocomplete="username" required></label>
+      <label>Contraseña<input id="password" type="password" autocomplete="current-password" required></label>
+      <button class="primary full" type="submit">Entrar</button>
+      <div id="loginError" class="error"></div>
+    </form>
+  </div>
+
+  <div id="app" class="app-shell hidden">
+    <aside class="sidebar">
+      <div class="sidebar-brand"><div class="brand-mark small">H</div><strong>Hamster</strong></div>
+      <nav>
+        <button class="nav-item active" data-section="dashboard">Dashboard</button>
+        <button class="nav-item" data-section="event">Evento principal</button>
+        <button class="nav-item" data-section="tickets">Boletos</button>
+        <button class="nav-item" data-section="discover">Inicio / Discover</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div id="userEmail" class="user-email"></div>
+        <button id="logoutBtn" class="ghost full">Cerrar sesión</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div><span class="eyebrow">HAMSTER ADMIN</span><h2 id="pageTitle">Dashboard</h2></div>
+        <div id="connectionBadge" class="badge">Firebase</div>
+      </header>
+
+      <section id="dashboard" class="section active-section">
+        <div class="stats-grid">
+          <article class="stat"><span>Evento</span><strong id="statEvent">—</strong><small>Event/Evento</small></article>
+          <article class="stat"><span>Boletos</span><strong id="statTickets">0</strong><small>Event/Evento/Tickets</small></article>
+          <article class="stat"><span>Inicio</span><strong id="statDiscover">0</strong><small>Event/Discover/Eventos</small></article>
+        </div>
+        <article class="panel">
+          <div class="panel-head"><div><h3>Estado actual</h3><p>Datos leídos directamente desde Firestore.</p></div><button id="refreshBtn" class="secondary">Actualizar</button></div>
+          <div id="dashboardSummary" class="summary"></div>
+        </article>
+      </section>
+
+      <section id="event" class="section">
+        <article class="panel">
+          <div class="panel-head"><div><h3>Evento principal</h3><p>Controla My Events y el encabezado de Mis boletos.</p></div></div>
+          <form id="eventForm" class="form-grid">
+            <label>Nombre<input name="Nombre" required></label>
+            <label>Fecha y hora<input name="Fecha" required></label>
+            <label class="wide">Lugar<input name="Lugar" required></label>
+            <label class="wide">URL imagen del evento<input name="eventIMG" type="url" placeholder="https://..."></label>
+            <div class="wide image-preview"><img id="eventPreview" alt="Preview evento"></div>
+            <div class="wide actions"><button class="primary" type="submit">Guardar cambios</button></div>
+          </form>
+        </article>
+      </section>
+
+      <section id="tickets" class="section">
+        <article class="panel">
+          <div class="panel-head"><div><h3>Boletos</h3><p>Se muestran en el mismo orden que usa la app.</p></div><button id="newTicketBtn" class="primary">+ Nuevo boleto</button></div>
+          <div id="ticketsList" class="cards-list"></div>
+        </article>
+      </section>
+
+      <section id="discover" class="section">
+        <article class="panel">
+          <div class="panel-head"><div><h3>Inicio / Discover</h3><p>Eventos utilizados por Inicio. Los documentos numéricos mantienen el orden actual.</p></div><button id="newDiscoverBtn" class="primary">+ Nuevo evento</button></div>
+          <div id="discoverList" class="cards-list"></div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="ticketDialog" class="modal">
+    <form id="ticketForm" method="dialog">
+      <div class="modal-head"><div><span class="eyebrow">BOLETO</span><h3 id="ticketModalTitle">Editar boleto</h3></div><button type="button" class="icon-btn" data-close="ticketDialog">×</button></div>
+      <input type="hidden" name="docId">
+      <div class="form-grid compact">
+        <label>Tipo<input name="Type"></label><label>Orden<input name="Order" type="number"></label>
+        <label>Sección<input name="Sec"></label><label>Fila<input name="Row"></label><label>Asiento<input name="Seat"></label>
+        <label class="wide">Nombre del evento<input name="Name"></label><label class="wide">Fecha<input name="Date"></label>
+        <label>Acceso<input name="Acceso"></label><label>Seat Detail<input name="SeatDetail"></label>
+        <label class="wide">ImageUrl<input name="ImageUrl" type="url"></label>
+        <label class="wide">Barcode URL<input name="Barcode" type="url"></label>
+        <label class="wide">SafeIMG URL<input name="SafeIMG" type="url"></label>
+        <label>Barcode Number<input name="BarcodeNumber"></label><label>Price<input name="Price"></label>
+        <label>Place<input name="Place"></label><label>City<input name="City"></label>
+        <label class="wide">Purchase<input name="Purchase"></label>
+      </div>
+      <div class="modal-actions"><button type="button" id="deleteTicketBtn" class="danger">Eliminar</button><span></span><button type="button" class="ghost" data-close="ticketDialog">Cancelar</button><button type="submit" class="primary">Guardar</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="discoverDialog" class="modal">
+    <form id="discoverForm" method="dialog">
+      <div class="modal-head"><div><span class="eyebrow">INICIO</span><h3 id="discoverModalTitle">Editar evento</h3></div><button type="button" class="icon-btn" data-close="discoverDialog">×</button></div>
+      <input type="hidden" name="docId">
+      <div class="form-grid compact">
+        <label class="wide">Nombre<input name="Nombre" required></label>
+        <label class="wide">Lugar<input name="Lugar"></label>
+        <label class="wide">Fecha<input name="Fecha"></label>
+        <label class="wide">EventoUrl / imagen<input name="EventoUrl" type="url"></label>
+      </div>
+      <div class="modal-actions"><button type="button" id="deleteDiscoverBtn" class="danger">Eliminar</button><span></span><button type="button" class="ghost" data-close="discoverDialog">Cancelar</button><button type="submit" class="primary">Guardar</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
