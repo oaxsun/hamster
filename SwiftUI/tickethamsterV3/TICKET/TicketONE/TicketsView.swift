@@ -97,7 +97,9 @@ struct TicketsView: View {
                             Text((eventVM.event?.nombre ?? firstPage?.tx6 ?? "CARGANDO EVENTO…").firebaseLineBreaks)
                                 .font(.system(size: 27, weight: .bold))
                                 .foregroundStyle(.white)
-                                .lineLimit(2)
+                                .multilineTextAlignment(.leading)
+                                .lineLimit(nil)
+                                .fixedSize(horizontal: false, vertical: true)
 
                             Spacer(minLength: 8)
                         }
@@ -136,7 +138,7 @@ struct TicketsView: View {
                         .offset(y: -19)
                 }
             }
-            .frame(height: 142)
+            .frame(height: 168)
 
             Button {
                 showCodeViewer = true
