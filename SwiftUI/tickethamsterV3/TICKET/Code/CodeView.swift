@@ -1,149 +1,56 @@
-//
-//  CodeView.swift
-//  tickethamsterV3
-//
-//  Created by Eduardo Jimenez on 21/10/24.
-//
-
 import SwiftUI
 
 struct CodeView: View {
 
-    @State private var modal = false
-    @State private var animation: Bool = false
-    @State private var isPresented: Bool = false
-
-    @Environment(\.presentationMode) var presentationMode
+    @State private var animation = false
+    @State private var showRefreshError = false
+    @State private var showDetails = false
 
     let page: Page
 
     var body: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 0) {
 
-        ZStack {
+                barcodeCard
+                    .padding(.horizontal, 24)
+                    .padding(.top, 8)
 
-            safeBackground
+                safeArtwork
+                    .frame(height: 255)
+                    .clipped()
+                    .padding(.horizontal, 34)
 
-            RoundedRectangle(cornerRadius: 15.0)
-                .frame(width: 310, height: 138)
-                .padding(.bottom, 178)
-                .foregroundColor(.white)
+                ticketInfoCard
+                    .padding(.horizontal, 34)
 
-            Text(page.tx1.firebaseLineBreaks)
-                .padding(.bottom, 595)
-                .foregroundColor(.white)
-                .font(.system(size: 22))
+                Button {
+                    showDetails = true
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: "info.circle")
+                            .font(.system(size: 19, weight: .medium))
 
-            Text("SEC                   ROW                  SEAT")
-                .padding(.bottom, 512)
-                .foregroundColor(.white)
-                .font(.system(size: 14))
-
-            Text(page.tx3.firebaseLineBreaks)
-                .padding(.bottom, 440)
-                .foregroundColor(.white)
-                .font(.system(size: 22))
-                .padding(.trailing, 200)
-
-            Text(page.tx4.firebaseLineBreaks)
-                .padding(.bottom, 440)
-                .foregroundColor(.white)
-                .font(.system(size: 22))
-
-            Text(page.tx5.firebaseLineBreaks)
-                .padding(.bottom, 440)
-                .foregroundColor(.white)
-                .font(.system(size: 22))
-                .padding(.leading, 200)
-
-            barcodeImage
-
-            Text("Boleto digital")
-                .foregroundColor(.white)
-                .font(.system(size: 16))
-                .padding(.top, 25)
-
-            Text("Screenshot's won't get you in.")
-                .font(.system(size: 13))
-                .padding(.bottom, 95)
-                .foregroundColor(.black)
-
-            Button(action: {}) {
-                ZStack {
-                    Rectangle()
-                        .frame(width: 170, height: 45)
-                        .foregroundColor(Color("blueticket"))
-                        .cornerRadius(5.0)
-
-                    HStack {
-                        Image(systemName: "checkmark.circle")
-                            .font(.system(size: 22))
-                        Text("View in Wallet")
-                            .font(.system(size: 16))
+                        Text("Información del Boleto")
+                            .font(.system(size: 14, weight: .semibold))
                     }
-                    .foregroundColor(.white)
-                }
-            }
-            .padding(.top, 120)
-
-            ZStack(alignment: .leading) {
-
-                Text("ENTRANCE")
-                    .foregroundColor(.white)
-                    .font(.system(size: 18))
-                    .padding(.top, 210)
-
-                Text(page.acceso.firebaseLineBreaks)
-                    .multilineTextAlignment(.leading)
-                    .foregroundColor(.white)
-                    .font(.system(size: 12))
-                    .padding(.top, 255)
-            }
-            .padding(.trailing, 300)
-
-            ZStack {
-
-                Button(action: { isPresented = true }) {
-                    Image(systemName: "arrow.clockwise").bold()
-                        .foregroundColor(.black)
-                        .font(.system(size: 20))
-                        .padding(.leading, 250)
-                        .padding(.bottom, 95)
-                }
-                .alert(isPresented: $isPresented) {
-                    Alert(
-                        title: Text("Error"),
-                        message: Text("A network error has occurred, please try again later."),
-                        dismissButton: .default(Text("Accept"))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 18)
+                    .frame(height: 48)
+                    .overlay(
+                        Capsule()
+                            .stroke(.white.opacity(0.9), lineWidth: 1.2)
                     )
                 }
-
-                // ✅ Barras animadas (se reinician con animation)
-                Rectangle()
-                    .frame(width: 12, height: 68)
-                    .frame(maxWidth: 302, alignment: animation ? .trailing : .leading)
-                    .foregroundColor(Color("blueticket"))
-                    .opacity(0.6)
-                    .padding(.bottom, 216)
-                    .animation(
-                        Animation.linear(duration: 1.5)
-                            .repeatForever(autoreverses: true)
-                            .delay(0.13),
-                        value: animation
-                    )
-
-                Rectangle()
-                    .frame(width: 4, height: 90)
-                    .frame(maxWidth: 295, alignment: animation ? .trailing : .leading)
-                    .foregroundColor(Color("blueticket"))
-                    .padding(.bottom, 216)
-                    .animation(
-                        Animation.linear(duration: 1.5)
-                            .repeatForever(autoreverses: true),
-                        value: animation
-                    )
+                .buttonStyle(.plain)
+                .padding(.top, 24)
+                .padding(.bottom, 18)
             }
         }
-        // ✅ Reinicio limpio al entrar/salir
+        .background(Color.black)
+        .fullScreenCover(isPresented: $showDetails) {
+            Details(page: page)
+        }
         .onAppear {
             restartScanAnimation()
         }
@@ -152,84 +59,208 @@ struct CodeView: View {
         }
     }
 
-    private func restartScanAnimation() {
-        // 1) apaga
-        animation = false
-        // 2) prende en el siguiente runloop para reiniciar desde el inicio
-        DispatchQueue.main.async {
-            animation = true
+    private var barcodeCard: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Spacer()
+                Text("ticketmaster")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .padding(.trailing, 10)
+            }
+            .frame(height: 25)
+            .background(Color(red: 0.04, green: 0.32, blue: 0.90))
+
+            ZStack {
+                Color.white
+
+                VStack(spacing: 8) {
+                    Text("Con capturas de pantalla no se te permitirá el acceso.")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(.gray)
+
+                    ZStack {
+                        barcodeImage
+
+                        Rectangle()
+                            .frame(width: 10, height: 70)
+                            .frame(maxWidth: 290, alignment: animation ? .trailing : .leading)
+                            .foregroundStyle(Color(red: 0.04, green: 0.32, blue: 0.90).opacity(0.55))
+                            .animation(
+                                .linear(duration: 1.5)
+                                    .repeatForever(autoreverses: true),
+                                value: animation
+                            )
+
+                        Rectangle()
+                            .frame(width: 3, height: 84)
+                            .frame(maxWidth: 286, alignment: animation ? .trailing : .leading)
+                            .foregroundStyle(Color(red: 0.04, green: 0.32, blue: 0.90))
+                            .animation(
+                                .linear(duration: 1.5)
+                                    .repeatForever(autoreverses: true),
+                                value: animation
+                            )
+
+                        Button {
+                            showRefreshError = true
+                        } label: {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.system(size: 19, weight: .medium))
+                                .foregroundStyle(.black)
+                                .frame(width: 34, height: 34)
+                        }
+                        .buttonStyle(.plain)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+            }
+            .frame(height: 120)
+        }
+        .alert("Error", isPresented: $showRefreshError) {
+            Button("Aceptar", role: .cancel) { }
+        } message: {
+            Text("A network error has occurred, please try again later.")
         }
     }
 
-    // MARK: - Fondo SafeIMG
-    private var safeBackground: some View {
+    private var safeArtwork: some View {
         Group {
-            if let url = URL(string: page.safeUrl), !page.safeUrl.isEmpty {
+            if let url = URL(string: page.safeUrl),
+               !page.safeUrl.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .empty:
-                        Color.black.opacity(0.2)
-                            .frame(width: 440, height: 774)
+                        ZStack {
+                            Color(red: 0.12, green: 0.12, blue: 0.12)
+                            ProgressView().tint(.white)
+                        }
                     case .success(let image):
                         image
                             .resizable()
-                            .frame(width: 440, height: 774)
-                            .clipped()
+                            .scaledToFill()
                     case .failure:
-                        Image("safeSample") // ✅ tu fallback local
-                            .resizable()
-                            .frame(width: 440, height: 774)
+                        fallbackSafeArtwork
                     @unknown default:
-                        Image("safeSample")
-                            .resizable()
-                            .frame(width: 440, height: 774)
+                        fallbackSafeArtwork
                     }
                 }
             } else {
-                Image("safeSample")
-                    .resizable()
-                    .frame(width: 440, height: 774)
+                fallbackSafeArtwork
             }
         }
     }
 
-    // MARK: - Código de barras (Barcode)
+    private var fallbackSafeArtwork: some View {
+        Image("safeSample")
+            .resizable()
+            .scaledToFill()
+    }
+
+    private var ticketInfoCard: some View {
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(page.tx1.firebaseLineBreaks)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(.white)
+
+                Text("Admisión General")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.9))
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 14)
+            .background(Color(red: 0.24, green: 0.24, blue: 0.24))
+
+            Divider()
+                .overlay(.white.opacity(0.35))
+
+            HStack(spacing: 0) {
+                infoColumn(title: "SECCIÓN", value: page.tx3)
+                infoColumn(title: "FILA", value: page.tx4)
+                infoColumn(title: "ASIENTO", value: page.tx5)
+            }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 14)
+            .background(Color(red: 0.24, green: 0.24, blue: 0.24))
+
+            Text(page.acceso.firebaseLineBreaks.isEmpty ? "ACCESO" : page.acceso.firebaseLineBreaks)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.black)
+                .frame(maxWidth: .infinity)
+                .frame(height: 42)
+                .background(Color.white)
+
+            Button { } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.circle")
+                        .font(.system(size: 17, weight: .medium))
+                    Text("Ver en Wallet")
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                .foregroundStyle(.white)
+            }
+            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity)
+            .frame(height: 46)
+            .background(Color.black)
+        }
+    }
+
+    private func infoColumn(title: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(.white.opacity(0.75))
+
+            Text((value.isEmpty ? "—" : value).firebaseLineBreaks)
+                .font(.system(size: 17, weight: .bold))
+                .foregroundStyle(.white)
+                .lineLimit(2)
+                .minimumScaleFactor(0.75)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     private var barcodeImage: some View {
         Group {
-            if let url = URL(string: page.barcodeUrl), !page.barcodeUrl.isEmpty {
+            if let url = URL(string: page.barcodeUrl),
+               !page.barcodeUrl.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .empty:
                         ProgressView()
-                            .frame(width: 280, height: 68)
-                            .padding(.bottom, 216)
+                            .tint(.black)
                     case .success(let image):
                         image
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 280, height: 68)
-                            .padding(.bottom, 216)
                     case .failure:
-                        Image("codeSample") // ✅ tu fallback local
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 280, height: 68)
-                            .padding(.bottom, 216)
+                        fallbackBarcode
                     @unknown default:
-                        Image("codeSample")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 280, height: 68)
-                            .padding(.bottom, 216)
+                        fallbackBarcode
                     }
                 }
             } else {
-                Image("codeSample")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 280, height: 68)
-                    .padding(.bottom, 216)
+                fallbackBarcode
             }
+        }
+        .frame(height: 72)
+    }
+
+    private var fallbackBarcode: some View {
+        Image("codeSample")
+            .resizable()
+            .scaledToFit()
+    }
+
+    private func restartScanAnimation() {
+        animation = false
+        DispatchQueue.main.async {
+            animation = true
         }
     }
 }
