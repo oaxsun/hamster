@@ -9,43 +9,14 @@ struct CodeView: View {
     let page: Page
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 0) {
+        VStack(spacing: 0) {
+            dynamicTicket
+                .padding(.horizontal, 0)
 
-                barcodeCard
-                    .padding(.horizontal, 24)
-                    .padding(.top, 8)
-
-                safeArtwork
-                    .frame(height: 255)
-                    .clipped()
-                    .padding(.horizontal, 34)
-
-                ticketInfoCard
-                    .padding(.horizontal, 34)
-
-                Button {
-                    showDetails = true
-                } label: {
-                    HStack(spacing: 10) {
-                        Image(systemName: "info.circle")
-                            .font(.system(size: 19, weight: .medium))
-
-                        Text("Información del Boleto")
-                            .font(.system(size: 14, weight: .semibold))
-                    }
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 18)
-                    .frame(height: 48)
-                    .overlay(
-                        Capsule()
-                            .stroke(.white.opacity(0.9), lineWidth: 1.2)
-                    )
-                }
-                .buttonStyle(.plain)
-                .padding(.top, 24)
-                .padding(.bottom, 18)
-            }
+            bottomActions
+                .padding(.top, 28)
+                .padding(.horizontal, 36)
+                .padding(.bottom, 14)
         }
         .background(Color.black)
         .fullScreenCover(isPresented: $showDetails) {
@@ -59,66 +30,94 @@ struct CodeView: View {
         }
     }
 
-    private var barcodeCard: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Spacer()
-                Text("ticketmaster")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .padding(.trailing, 10)
-            }
-            .frame(height: 25)
-            .background(Color(red: 0.04, green: 0.32, blue: 0.90))
+    // MARK: - Ticket dinámico completo
 
-            ZStack {
-                Color.white
+    private var dynamicTicket: some View {
+        GeometryReader { geometry in
+            let width = geometry.size.width
+            let infoWidth = width * 0.82
 
-                VStack(spacing: 8) {
-                    Text("Con capturas de pantalla no se te permitirá el acceso.")
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundStyle(.gray)
+            ZStack(alignment: .top) {
+                safeBackground
+                    .frame(width: width, height: geometry.size.height)
+                    .clipped()
 
-                    ZStack {
-                        barcodeImage
+                VStack(spacing: 0) {
+                    ticketmasterBar
+                    barcodeCard
+                        .padding(.horizontal, width * 0.085)
+                        .padding(.top, 34)
 
-                        Rectangle()
-                            .frame(width: 10, height: 70)
-                            .frame(maxWidth: 290, alignment: animation ? .trailing : .leading)
-                            .foregroundStyle(Color(red: 0.04, green: 0.32, blue: 0.90).opacity(0.55))
-                            .animation(
-                                .linear(duration: 1.5)
-                                    .repeatForever(autoreverses: true),
-                                value: animation
-                            )
-
-                        Rectangle()
-                            .frame(width: 3, height: 84)
-                            .frame(maxWidth: 286, alignment: animation ? .trailing : .leading)
-                            .foregroundStyle(Color(red: 0.04, green: 0.32, blue: 0.90))
-                            .animation(
-                                .linear(duration: 1.5)
-                                    .repeatForever(autoreverses: true),
-                                value: animation
-                            )
-
-                        Button {
-                            showRefreshError = true
-                        } label: {
-                            Image(systemName: "arrow.clockwise")
-                                .font(.system(size: 19, weight: .medium))
-                                .foregroundStyle(.black)
-                                .frame(width: 34, height: 34)
-                        }
-                        .buttonStyle(.plain)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                    }
+                    Spacer()
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+
+                ticketInfoCard
+                    .frame(width: infoWidth)
+                    .frame(maxHeight: .infinity, alignment: .bottomLeading)
             }
-            .frame(height: 120)
         }
+        .frame(height: 665)
+    }
+
+    private var ticketmasterBar: some View {
+        ZStack {
+            Color(red: 0.035, green: 0.31, blue: 0.90)
+
+            Text("ticketmaster")
+                .font(.system(size: 13, weight: .semibold))
+                .italic()
+                .foregroundStyle(.white)
+        }
+        .frame(height: 26)
+    }
+
+    private var barcodeCard: some View {
+        ZStack {
+            Color.white
+
+            VStack(spacing: 10) {
+                HStack(spacing: 8) {
+                    Spacer()
+
+                    Text("Screenshots won’t get you in.")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(.black)
+
+                    Button {
+                        showRefreshError = true
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundStyle(.black)
+                    }
+                    .buttonStyle(.plain)
+
+                    Spacer()
+                }
+
+                ZStack {
+                    Color(red: 0.86, green: 0.86, blue: 0.86)
+
+                    barcodeImage
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+
+                    Rectangle()
+                        .frame(width: 4, height: 88)
+                        .frame(maxWidth: .infinity, alignment: animation ? .trailing : .leading)
+                        .foregroundStyle(Color(red: 0.12, green: 0.56, blue: 0.98))
+                        .animation(
+                            .linear(duration: 1.5)
+                                .repeatForever(autoreverses: true),
+                            value: animation
+                        )
+                }
+                .frame(height: 94)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 14)
+        }
+        .frame(height: 142)
         .alert("Error", isPresented: $showRefreshError) {
             Button("Aceptar", role: .cancel) { }
         } message: {
@@ -126,129 +125,165 @@ struct CodeView: View {
         }
     }
 
-    private var safeArtwork: some View {
-        Group {
-            if let url = URL(string: page.safeUrl),
-               !page.safeUrl.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .empty:
-                        ZStack {
-                            Color(red: 0.12, green: 0.12, blue: 0.12)
-                            ProgressView().tint(.white)
-                        }
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .scaledToFill()
-                    case .failure:
-                        fallbackSafeArtwork
-                    @unknown default:
-                        fallbackSafeArtwork
-                    }
-                }
-            } else {
-                fallbackSafeArtwork
-            }
-        }
-    }
-
-    private var fallbackSafeArtwork: some View {
-        Image("safeSample")
-            .resizable()
-            .scaledToFill()
-    }
+    // MARK: - Bloque inferior del ticket
 
     private var ticketInfoCard: some View {
         VStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 5) {
                 Text(page.tx1.firebaseLineBreaks)
-                    .font(.system(size: 16, weight: .bold))
+                    .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(.white)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
 
                 Text("Admisión General")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.9))
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.88))
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 18)
-            .padding(.vertical, 14)
-            .background(Color(red: 0.24, green: 0.24, blue: 0.24))
+            .padding(.horizontal, 22)
+            .padding(.top, 18)
+            .padding(.bottom, 14)
 
-            Divider()
-                .overlay(.white.opacity(0.35))
+            Rectangle()
+                .fill(.white.opacity(0.48))
+                .frame(height: 1)
+                .padding(.horizontal, 22)
 
             HStack(spacing: 0) {
-                infoColumn(title: "SECCIÓN", value: page.tx3)
-                infoColumn(title: "FILA", value: page.tx4)
-                infoColumn(title: "ASIENTO", value: page.tx5)
+                infoColumn(title: "SECCIÓN", value: page.tx3, alignment: .leading)
+                infoColumn(title: "FILA", value: page.tx4, alignment: .center)
+                infoColumn(title: "ASIENTO", value: page.tx5, alignment: .trailing)
             }
-            .padding(.horizontal, 18)
-            .padding(.vertical, 14)
-            .background(Color(red: 0.24, green: 0.24, blue: 0.24))
+            .padding(.horizontal, 22)
+            .padding(.vertical, 15)
 
             Text(page.acceso.firebaseLineBreaks.isEmpty ? "ACCESO" : page.acceso.firebaseLineBreaks)
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(.black)
                 .frame(maxWidth: .infinity)
-                .frame(height: 42)
+                .frame(height: 46)
                 .background(Color.white)
-
-            Button { } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "checkmark.circle")
-                        .font(.system(size: 17, weight: .medium))
-                    Text("Ver en Wallet")
-                        .font(.system(size: 14, weight: .semibold))
-                }
-                .foregroundStyle(.white)
-            }
-            .buttonStyle(.plain)
-            .frame(maxWidth: .infinity)
-            .frame(height: 46)
-            .background(Color.black)
+                .padding(.horizontal, 22)
+                .padding(.bottom, 14)
         }
+        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
     }
 
-    private func infoColumn(title: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+    private func infoColumn(title: String, value: String, alignment: Alignment) -> some View {
+        VStack(alignment: alignment == .trailing ? .trailing : .leading, spacing: 6) {
             Text(title)
                 .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(.white.opacity(0.75))
+                .foregroundStyle(.white.opacity(0.76))
 
             Text((value.isEmpty ? "—" : value).firebaseLineBreaks)
-                .font(.system(size: 17, weight: .bold))
+                .font(.system(size: 16, weight: .bold))
                 .foregroundStyle(.white)
                 .lineLimit(2)
-                .minimumScaleFactor(0.75)
+                .minimumScaleFactor(0.72)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: alignment)
     }
 
-    private var barcodeImage: some View {
-        Group {
-            if let url = URL(string: page.barcodeUrl),
-               !page.barcodeUrl.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .empty:
-                        ProgressView()
-                            .tint(.black)
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .scaledToFit()
-                    case .failure:
-                        fallbackBarcode
-                    @unknown default:
-                        fallbackBarcode
-                    }
-                }
-            } else {
-                fallbackBarcode
+    // MARK: - Acciones debajo del ticket
+
+    private var bottomActions: some View {
+        HStack(alignment: .center) {
+            Button { } label: {
+                Text("Ver en Wallet")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.white)
             }
+            .buttonStyle(.plain)
+
+            Spacer()
+
+            Button {
+                showDetails = true
+            } label: {
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(.white)
+                        .frame(width: 28, height: 28)
+                        .overlay(
+                            Image(systemName: "info")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundStyle(.black)
+                        )
+
+                    Text("Información\ndel Boleto")
+                        .font(.system(size: 12, weight: .semibold))
+                        .multilineTextAlignment(.leading)
+                        .foregroundStyle(.white)
+                }
+                .padding(.horizontal, 10)
+                .frame(height: 46)
+                .overlay(
+                    Capsule()
+                        .stroke(.white, lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
         }
-        .frame(height: 72)
+    }
+
+    // MARK: - SafeIMG como fondo
+
+    @ViewBuilder
+    private var safeBackground: some View {
+        if let url = URL(string: page.safeUrl),
+           !page.safeUrl.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .empty:
+                    ZStack {
+                        Color(red: 0.68, green: 0.66, blue: 0.66)
+                        ProgressView().tint(.white)
+                    }
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFill()
+                case .failure:
+                    fallbackSafeBackground
+                @unknown default:
+                    fallbackSafeBackground
+                }
+            }
+        } else {
+            fallbackSafeBackground
+        }
+    }
+
+    private var fallbackSafeBackground: some View {
+        Image("safeSample")
+            .resizable()
+            .scaledToFill()
+    }
+
+    // MARK: - Barcode
+
+    @ViewBuilder
+    private var barcodeImage: some View {
+        if let url = URL(string: page.barcodeUrl),
+           !page.barcodeUrl.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .empty:
+                    ProgressView().tint(.black)
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFit()
+                case .failure:
+                    fallbackBarcode
+                @unknown default:
+                    fallbackBarcode
+                }
+            }
+        } else {
+            fallbackBarcode
+        }
     }
 
     private var fallbackBarcode: some View {
