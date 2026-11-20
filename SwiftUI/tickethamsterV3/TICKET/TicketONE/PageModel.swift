@@ -6,11 +6,161 @@
 //
 
 import Foundation
+import SwiftUI
+import UIKit
+import CryptoKit
 
 extension String {
     /// Converts literal \n sequences stored in Firestore into real line breaks for SwiftUI.
     var firebaseLineBreaks: String {
         replacingOccurrences(of: "\\n", with: "\n")
+    }
+}
+
+
+
+// MARK: - Persistent remote image cache
+
+private final class HamsterImageMemoryCache {
+    static let shared = NSCache<NSString, UIImage>()
+}
+
+private enum HamsterImageDiskCache {
+    static let directory: URL = {
+        let base = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
+        let directory = base.appendingPathComponent("HamsterRemoteImages", isDirectory: true)
+        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        return directory
+    }()
+
+    static func fileURL(for remoteURL: URL) -> URL {
+        let digest = SHA256.hash(data: Data(remoteURL.absoluteString.utf8))
+            .map { String(format: "%02x", $0) }
+            .joined()
+        return directory.appendingPathComponent(digest)
+    }
+
+    static func image(for remoteURL: URL) -> UIImage? {
+        let key = remoteURL.absoluteString as NSString
+
+        if let image = HamsterImageMemoryCache.shared.object(forKey: key) {
+            return image
+        }
+
+        let fileURL = fileURL(for: remoteURL)
+        guard
+            let data = try? Data(contentsOf: fileURL),
+            let image = UIImage(data: data)
+        else {
+            return nil
+        }
+
+        HamsterImageMemoryCache.shared.setObject(image, forKey: key)
+        return image
+    }
+
+    static func store(_ data: Data, image: UIImage, for remoteURL: URL) {
+        HamsterImageMemoryCache.shared.setObject(image, forKey: remoteURL.absoluteString as NSString)
+        try? data.write(to: fileURL(for: remoteURL), options: .atomic)
+    }
+}
+
+private final class HamsterRemoteImageLoader: ObservableObject {
+    @Published var image: UIImage?
+    @Published var didFail = false
+
+    private var task: URLSessionDataTask?
+    private var currentURL: URL?
+
+    func load(urlString: String) {
+        task?.cancel()
+        didFail = false
+
+        guard
+            let url = URL(string: urlString),
+            !urlString.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        else {
+            image = nil
+            didFail = true
+            return
+        }
+
+        currentURL = url
+
+        if let cached = HamsterImageDiskCache.image(for: url) {
+            image = cached
+        }
+
+        // Always try the network too. If it succeeds, the disk cache is refreshed.
+        // If offline, the already-published cached image remains visible.
+        var request = URLRequest(url: url)
+        request.cachePolicy = .reloadRevalidatingCacheData
+        request.timeoutInterval = 15
+
+        task = URLSession.shared.dataTask(with: request) { [weak self] data, _, error in
+            guard let self else { return }
+            guard self.currentURL == url else { return }
+
+            guard
+                error == nil,
+                let data,
+                let downloadedImage = UIImage(data: data)
+            else {
+                DispatchQueue.main.async {
+                    if self.image == nil {
+                        self.didFail = true
+                    }
+                }
+                return
+            }
+
+            HamsterImageDiskCache.store(data, image: downloadedImage, for: url)
+
+            DispatchQueue.main.async {
+                self.image = downloadedImage
+                self.didFail = false
+            }
+        }
+        task?.resume()
+    }
+
+    deinit {
+        task?.cancel()
+    }
+}
+
+/// Remote image that persists the last successfully downloaded file on disk.
+/// When offline it immediately reuses that file; when online it refreshes it.
+struct OfflineCachedImage: View {
+    let urlString: String
+    let fallbackAsset: String
+    var contentMode: ContentMode = .fill
+
+    @StateObject private var loader = HamsterRemoteImageLoader()
+
+    var body: some View {
+        Group {
+            if let uiImage = loader.image {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: contentMode)
+            } else if loader.didFail {
+                Image(fallbackAsset)
+                    .resizable()
+                    .aspectRatio(contentMode: contentMode)
+            } else {
+                ZStack {
+                    Color.clear
+                    ProgressView()
+                }
+            }
+        }
+        .onAppear {
+            loader.load(urlString: urlString)
+        }
+        .onChange(of: urlString) { _ in
+            loader.load(urlString: urlString)
+        }
     }
 }
 
