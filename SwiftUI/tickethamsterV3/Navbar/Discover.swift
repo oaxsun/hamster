@@ -7,6 +7,7 @@ struct Discover: View {
     @State private var eventsError: String?
     @State private var searchText = ""
     @State private var showEventError = false
+    @State private var discoverListener: ListenerRegistration?
 
     private let accentBlue = Color(red: 0.03, green: 0.35, blue: 0.95)
     private let accentCyan = Color(red: 0.00, green: 0.86, blue: 0.79)
@@ -41,7 +42,11 @@ struct Discover: View {
             ErrorEvent()
         }
         .onAppear {
-            fetchDiscoverEvents()
+            listenToDiscoverEvents()
+        }
+        .onDisappear {
+            discoverListener?.remove()
+            discoverListener = nil
         }
     }
 
@@ -232,15 +237,16 @@ struct Discover: View {
         return Event.previewHomeEvents
     }
 
-    private func fetchDiscoverEvents() {
-        isLoadingEvents = true
+    private func listenToDiscoverEvents() {
+        isLoadingEvents = events.isEmpty
         eventsError = nil
 
-        Firestore.firestore()
+        discoverListener?.remove()
+        discoverListener = Firestore.firestore()
             .collection("Event")
             .document("Discover")
             .collection("Eventos")
-            .getDocuments { snapshot, error in
+            .addSnapshotListener(includeMetadataChanges: true) { snapshot, error in
                 isLoadingEvents = false
 
                 if let error = error {
@@ -264,6 +270,9 @@ struct Discover: View {
                     guard !nombre.isEmpty else { return nil }
                     return Event(id: doc.documentID, tx1: lugar, tx2: nombre, img1: url, fecha: fecha)
                 }
+
+                let source = snapshot?.metadata.isFromCache == true ? "cache" : "server"
+                print("🏠 Discover actualizado desde \(source): \(events.count) eventos")
             }
     }
 }
@@ -404,26 +413,11 @@ private struct RemoteEventImage: View {
     let urlString: String
 
     var body: some View {
-        Group {
-            if let url = URL(string: urlString), !urlString.isEmpty {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image.resizable().scaledToFill()
-                    case .empty:
-                        Image("discoverSample").resizable().scaledToFill()
-                    case .failure:
-                        Image("discoverSample").resizable().scaledToFill()
-                    @unknown default:
-                        Image("discoverSample").resizable().scaledToFill()
-                    }
-                }
-            } else {
-                Image("discoverSample")
-                    .resizable()
-                    .scaledToFill()
-            }
-        }
+        OfflineCachedImage(
+            urlString: urlString,
+            fallbackAsset: "discoverSample",
+            contentMode: .fill
+        )
     }
 }
 
