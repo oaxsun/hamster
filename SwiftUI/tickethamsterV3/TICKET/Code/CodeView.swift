@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct CodeView: View {
 
@@ -189,7 +190,9 @@ struct CodeView: View {
 
     private var bottomActions: some View {
         HStack(alignment: .center) {
-            Button { } label: {
+            Button {
+                openWallet()
+            } label: {
                 Text("Ver en Wallet")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(.white)
@@ -290,6 +293,11 @@ struct CodeView: View {
         Image("codeSample")
             .resizable()
             .scaledToFit()
+    }
+
+    private func openWallet() {
+        guard let url = URL(string: "shoebox://") else { return }
+        UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
 
     private func restartScanAnimation() {
