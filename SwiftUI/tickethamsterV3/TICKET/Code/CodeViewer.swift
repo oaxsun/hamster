@@ -50,14 +50,14 @@ struct CodeViewer: View {
         ZStack {
             if let page = currentPage {
                 VStack(alignment: .center, spacing: 4) {
-                    Text(page.tx7.firebaseLineBreaks)
+                    Text(page.tx6.firebaseLineBreaks)
                         .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
                         .lineLimit(1)
                         .minimumScaleFactor(0.72)
 
-                    Text(venueLine(for: page))
+                    Text(page.tx7.firebaseLineBreaks)
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(.white.opacity(0.9))
                         .multilineTextAlignment(.center)
