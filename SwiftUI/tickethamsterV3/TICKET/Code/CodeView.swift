@@ -98,8 +98,8 @@ struct CodeView: View {
 
                 ZStack {
                     barcodeImage
+                        .frame(height: 68)
                         .padding(.horizontal, 10)
-                        .padding(.vertical, 5)
 
                     Rectangle()
                         .frame(width: 12, height: 68)
