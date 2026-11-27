@@ -77,26 +77,30 @@ private enum TabBarIconFactory {
             UIColor(red: 0.00, green: 0.38, blue: 1.00, alpha: 1.00).setFill()
             UIBezierPath(ovalIn: contentBox).fill()
 
-            let paragraph = NSMutableParagraphStyle()
-            paragraph.alignment = .center
+            guard
+                let logo = UIImage(named: "logo"),
+                let cgImage = logo.cgImage
+            else { return }
 
-            let base = UIFont.systemFont(ofSize: 19.5, weight: .bold)
-            let font = base.fontDescriptor.withSymbolicTraits(.traitItalic)
-                .map { UIFont(descriptor: $0, size: 19.5) } ?? base
+            // Use the exact first "t" from the Ticketmaster wordmark used by the splash.
+            let cropWidth = Int(CGFloat(cgImage.width) * 0.135)
+            let cropRect = CGRect(
+                x: 0,
+                y: 0,
+                width: cropWidth,
+                height: cgImage.height
+            )
 
-            let attrs: [NSAttributedString.Key: Any] = [
-                .font: font,
-                .foregroundColor: UIColor.white,
-                .paragraphStyle: paragraph
-            ]
+            guard let croppedCG = cgImage.cropping(to: cropRect) else { return }
 
-            let tRect = CGRect(x: 2.25, y: 2.3, width: 22.5, height: 22.5)
-            ("t" as NSString).draw(in: tRect, withAttributes: attrs)
+            let cropped = UIImage(
+                cgImage: croppedCG,
+                scale: logo.scale,
+                orientation: logo.imageOrientation
+            )
 
-            if let star = UIImage(systemName: "sparkle")?
-                .withTintColor(.white, renderingMode: .alwaysOriginal) {
-                star.draw(in: CGRect(x: 19.0, y: 2.0, width: 5.8, height: 5.8))
-            }
+            let target = CGRect(x: 6.0, y: 4.2, width: 15.0, height: 19.0)
+            cropped.draw(in: target, blendMode: .normal, alpha: 1.0)
         }
         .withRenderingMode(.alwaysOriginal)
     }()
