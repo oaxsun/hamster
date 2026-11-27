@@ -37,20 +37,26 @@ struct ContentView: View {
             }
 
             tabButton(index: 1, title: "Watchlist") {
-                Image(systemName: "bookmark")
-                    .font(.system(size: 22, weight: .regular))
+                Image(systemName: selectedTab == 1 ? "bookmark.fill" : "bookmark")
+                    .font(.system(size: 20, weight: .regular))
                     .frame(width: 27, height: 27)
             }
 
             tabButton(index: 2, title: "Mis boletos") {
-                Image(uiImage: TicketCountIconAsset.tabImage)
-                    .renderingMode(.template)
-                    .frame(width: 27, height: 27)
+                if selectedTab == 2 {
+                    Image(systemName: "rectangle.stack.fill")
+                        .font(.system(size: 20, weight: .regular))
+                        .frame(width: 27, height: 27)
+                } else {
+                    Image(uiImage: TicketCountIconAsset.tabImage)
+                        .renderingMode(.template)
+                        .frame(width: 27, height: 27)
+                }
             }
 
             tabButton(index: 3, title: "Mi cuenta") {
-                Image(systemName: "person.crop.circle")
-                    .font(.system(size: 23, weight: .regular))
+                Image(systemName: selectedTab == 3 ? "person.crop.circle.fill" : "person.crop.circle")
+                    .font(.system(size: 22, weight: .regular))
                     .frame(width: 27, height: 27)
             }
         }
