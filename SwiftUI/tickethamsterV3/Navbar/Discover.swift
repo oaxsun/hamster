@@ -15,7 +15,7 @@ struct Discover: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color(red: 0.055, green: 0.055, blue: 0.055).ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
