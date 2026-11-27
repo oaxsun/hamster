@@ -41,6 +41,9 @@ struct ContentView: View {
                     .tabItem {
                         Image(uiImage: TicketCountIconAsset.image)
                             .renderingMode(.template)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 19, height: 19)
                         Text("Mis boletos")
                     }
 
