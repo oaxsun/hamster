@@ -114,7 +114,9 @@ struct TicketsView: View {
                             Spacer()
 
                             HStack(spacing: 7) {
-                                TicketsCountIcon()
+                                Image(uiImage: TicketCountIconAsset.image)
+                                    .resizable()
+                                    .scaledToFit()
                                     .frame(width: 30, height: 30)
 
                                 Text("x\(max(ticketsVM.pages.count, 1))")
@@ -474,34 +476,3 @@ extension Int: Identifiable {
 }
 
 
-private struct TicketsCountIcon: View {
-    var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 2.8)
-                .stroke(Color.white, lineWidth: 2.2)
-                .frame(width: 19, height: 23)
-                .rotationEffect(.degrees(7))
-                .offset(x: 4, y: 1.5)
-
-            ZStack {
-                RoundedRectangle(cornerRadius: 2.8)
-                    .stroke(Color.white, lineWidth: 2.2)
-
-                RoundedRectangle(cornerRadius: 1.4)
-                    .stroke(Color.white, lineWidth: 1.8)
-                    .frame(width: 9, height: 6)
-                    .offset(y: -4)
-
-                Capsule()
-                    .fill(Color.white)
-                    .frame(width: 10, height: 2)
-                    .offset(y: 6)
-            }
-            .frame(width: 19, height: 23)
-            .rotationEffect(.degrees(-5))
-            .offset(x: -3, y: -1)
-        }
-        .frame(width: 30, height: 30)
-        .accessibilityHidden(true)
-    }
-}
