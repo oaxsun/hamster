@@ -2,142 +2,114 @@ import SwiftUI
 import UIKit
 
 struct ContentView: View {
-    private let homeIcon = TabBarIconFactory.homeIcon
-    private let watchlistIcon = TabBarIconFactory.normalizedSymbol("bookmark")
-    private let ticketsIcon = TabBarIconFactory.normalizedImage(TicketCountIconAsset.image)
-    private let accountIcon = TabBarIconFactory.normalizedSymbol("person.crop.circle")
+    @State private var selectedTab = 0
 
-    init() {
-        let appearance = UITabBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor.black
-
-        appearance.stackedLayoutAppearance.normal.iconColor = UIColor.white
-        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [
-            .foregroundColor: UIColor(white: 0.62, alpha: 1)
-        ]
-
-        appearance.stackedLayoutAppearance.selected.iconColor = UIColor.systemBlue
-        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [
-            .foregroundColor: UIColor.white,
-            .font: UIFont.systemFont(ofSize: 12, weight: .semibold)
-        ]
-
-        UITabBar.appearance().standardAppearance = appearance
-        UITabBar.appearance().scrollEdgeAppearance = appearance
-    }
+    private let appBackground = Color(red: 0.055, green: 0.055, blue: 0.055)
 
     var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
+        ZStack(alignment: .bottom) {
+            appBackground.ignoresSafeArea()
 
-            TabView {
+            TabView(selection: $selectedTab) {
                 Discover()
-                    .tabItem {
-                        Image(uiImage: homeIcon)
-                            .renderingMode(.original)
-                        Text("Inicio")
-                    }
+                    .tag(0)
 
                 Favorites()
-                    .tabItem {
-                        Image(uiImage: watchlistIcon)
-                            .renderingMode(.template)
-                        Text("Watchlist")
-                    }
+                    .tag(1)
 
                 Events()
-                    .tabItem {
-                        Image(uiImage: ticketsIcon)
-                            .renderingMode(.template)
-                        Text("Mis boletos")
-                    }
+                    .tag(2)
 
                 Account()
-                    .tabItem {
-                        Image(uiImage: accountIcon)
-                            .renderingMode(.template)
-                        Text("Mi cuenta")
-                    }
+                    .tag(3)
             }
-            .tint(.blue)
+            .toolbar(.hidden, for: .tabBar)
+
+            customTabBar
         }
         .preferredColorScheme(.dark)
     }
-}
 
-private enum TabBarIconFactory {
-    private static let canvas = CGSize(width: 27, height: 27)
-    private static let contentBox = CGRect(x: 2.5, y: 2.5, width: 22, height: 22)
+    private var customTabBar: some View {
+        HStack(spacing: 0) {
+            tabButton(index: 0, title: "Inicio") {
+                HomeTabIcon(isSelected: selectedTab == 0)
+            }
 
-    static let homeIcon: UIImage = {
-        let renderer = UIGraphicsImageRenderer(size: canvas)
+            tabButton(index: 1, title: "Watchlist") {
+                Image(systemName: "bookmark")
+                    .font(.system(size: 22, weight: .regular))
+                    .frame(width: 27, height: 27)
+            }
 
-        return renderer.image { _ in
-            UIColor(red: 0.00, green: 0.38, blue: 1.00, alpha: 1.00).setFill()
-            UIBezierPath(ovalIn: contentBox).fill()
+            tabButton(index: 2, title: "Mis boletos") {
+                Image(uiImage: TicketCountIconAsset.tabImage)
+                    .renderingMode(.template)
+                    .frame(width: 27, height: 27)
+            }
 
-            guard
-                let logo = UIImage(named: "logo"),
-                let cgImage = logo.cgImage
-            else { return }
-
-            // Use the exact first "t" from the Ticketmaster wordmark used by the splash.
-            let cropWidth = Int(CGFloat(cgImage.width) * 0.135)
-            let cropRect = CGRect(
-                x: 0,
-                y: 0,
-                width: cropWidth,
-                height: cgImage.height
-            )
-
-            guard let croppedCG = cgImage.cropping(to: cropRect) else { return }
-
-            let cropped = UIImage(
-                cgImage: croppedCG,
-                scale: logo.scale,
-                orientation: logo.imageOrientation
-            )
-
-            let target = CGRect(x: 6.0, y: 4.2, width: 15.0, height: 19.0)
-            cropped.draw(in: target, blendMode: .normal, alpha: 1.0)
+            tabButton(index: 3, title: "Mi cuenta") {
+                Image(systemName: "person.crop.circle")
+                    .font(.system(size: 23, weight: .regular))
+                    .frame(width: 27, height: 27)
+            }
         }
-        .withRenderingMode(.alwaysOriginal)
-    }()
-
-    static func normalizedSymbol(_ name: String) -> UIImage {
-        let config = UIImage.SymbolConfiguration(pointSize: 22, weight: .regular)
-        let source = UIImage(systemName: name, withConfiguration: config) ?? UIImage()
-        return normalizedImage(source)
+        .frame(height: 74)
+        .padding(.bottom, 2)
+        .background(appBackground)
     }
 
-    static func normalizedImage(_ source: UIImage) -> UIImage {
-        let renderer = UIGraphicsImageRenderer(size: canvas)
+    private func tabButton<Icon: View>(
+        index: Int,
+        title: String,
+        @ViewBuilder icon: () -> Icon
+    ) -> some View {
+        Button {
+            selectedTab = index
+        } label: {
+            VStack(spacing: 5) {
+                icon()
+                    .foregroundStyle(selectedTab == index ? .white : .white.opacity(0.72))
 
-        let rendered = renderer.image { _ in
-            guard source.size.width > 0, source.size.height > 0 else { return }
-
-            let scale = min(
-                contentBox.width / source.size.width,
-                contentBox.height / source.size.height
-            )
-
-            let drawSize = CGSize(
-                width: source.size.width * scale,
-                height: source.size.height * scale
-            )
-
-            let drawRect = CGRect(
-                x: (canvas.width - drawSize.width) / 2,
-                y: (canvas.height - drawSize.height) / 2,
-                width: drawSize.width,
-                height: drawSize.height
-            )
-
-            source.withRenderingMode(.alwaysTemplate).draw(in: drawRect)
+                Text(title)
+                    .font(.system(size: 11.5, weight: selectedTab == index ? .semibold : .regular))
+                    .foregroundStyle(selectedTab == index ? .white : .white.opacity(0.62))
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity)
         }
+        .buttonStyle(.plain)
+    }
+}
 
-        return rendered.withRenderingMode(.alwaysTemplate)
+private struct HomeTabIcon: View {
+    let isSelected: Bool
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(isSelected ? Color(red: 0.00, green: 0.38, blue: 1.00) : Color.clear)
+                .overlay(
+                    Circle()
+                        .stroke(
+                            isSelected ? Color.clear : Color.white.opacity(0.88),
+                            lineWidth: 1.6
+                        )
+                )
+                .frame(width: 24, height: 24)
+
+            Text("t")
+                .font(.system(size: 18, weight: .bold, design: .default))
+                .italic()
+                .foregroundStyle(.white)
+                .offset(x: -0.3, y: -0.8)
+
+            Image(systemName: "sparkle")
+                .font(.system(size: 5.4, weight: .bold))
+                .foregroundStyle(.white)
+                .offset(x: 8.3, y: -8.0)
+        }
+        .frame(width: 27, height: 27)
     }
 }
 
