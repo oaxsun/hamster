@@ -80,8 +80,8 @@ private enum TabBarIconFactory {
             let paragraph = NSMutableParagraphStyle()
             paragraph.alignment = .center
 
-            let base = UIFont.systemFont(ofSize: 19.5, weight: .black)
-            let font = base.fontDescriptor.withSymbolicTraits([.traitItalic, .traitBold])
+            let base = UIFont.systemFont(ofSize: 19.5, weight: .bold)
+            let font = base.fontDescriptor.withSymbolicTraits(.traitItalic)
                 .map { UIFont(descriptor: $0, size: 19.5) } ?? base
 
             let attrs: [NSAttributedString.Key: Any] = [
