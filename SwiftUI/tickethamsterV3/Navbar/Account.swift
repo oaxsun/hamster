@@ -7,7 +7,7 @@ struct Account: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color(red: 0.055, green: 0.055, blue: 0.055).ignoresSafeArea()
 
                 ScrollView(showsIndicators: true) {
                     VStack(alignment: .leading, spacing: 26) {
