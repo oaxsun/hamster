@@ -74,15 +74,15 @@ private enum TabBarIconFactory {
         let renderer = UIGraphicsImageRenderer(size: canvas)
 
         return renderer.image { _ in
-            UIColor.systemBlue.setFill()
+            UIColor(red: 0.00, green: 0.38, blue: 1.00, alpha: 1.00).setFill()
             UIBezierPath(ovalIn: contentBox).fill()
 
             let paragraph = NSMutableParagraphStyle()
             paragraph.alignment = .center
 
-            let base = UIFont.systemFont(ofSize: 18.5, weight: .black)
-            let font = base.fontDescriptor.withSymbolicTraits(.traitItalic)
-                .map { UIFont(descriptor: $0, size: 18.5) } ?? base
+            let base = UIFont.systemFont(ofSize: 19.5, weight: .black)
+            let font = base.fontDescriptor.withSymbolicTraits([.traitItalic, .traitBold])
+                .map { UIFont(descriptor: $0, size: 19.5) } ?? base
 
             let attrs: [NSAttributedString.Key: Any] = [
                 .font: font,
@@ -90,7 +90,7 @@ private enum TabBarIconFactory {
                 .paragraphStyle: paragraph
             ]
 
-            let tRect = CGRect(x: 2.5, y: 3.0, width: 22, height: 22)
+            let tRect = CGRect(x: 2.25, y: 2.3, width: 22.5, height: 22.5)
             ("t" as NSString).draw(in: tRect, withAttributes: attrs)
 
             if let star = UIImage(systemName: "sparkle")?
