@@ -5,7 +5,7 @@ struct Events: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color(red: 0.055, green: 0.055, blue: 0.055).ignoresSafeArea()
 
             VStack(spacing: 0) {
                 header
