@@ -42,6 +42,7 @@ struct Events: View {
 
                 Spacer()
             }
+            .offset(y: -10)
 
             HStack {
                 Spacer()
@@ -51,6 +52,7 @@ struct Events: View {
                     .foregroundStyle(.white)
                     .padding(.trailing, 24)
             }
+            .offset(y: -10)
         }
         .frame(height: 92)
     }
