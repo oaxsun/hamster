@@ -141,19 +141,29 @@ struct OfflineCachedImage: View {
     let urlString: String
     let fallbackAsset: String
     var contentMode: ContentMode = .fill
+    var stretchToFill: Bool = false
 
     @StateObject private var loader = HamsterRemoteImageLoader()
+
+    @ViewBuilder
+    private func renderedImage(_ image: Image) -> some View {
+        if stretchToFill {
+            image
+                .resizable()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            image
+                .resizable()
+                .aspectRatio(contentMode: contentMode)
+        }
+    }
 
     var body: some View {
         Group {
             if let uiImage = loader.image {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .aspectRatio(contentMode: contentMode)
+                renderedImage(Image(uiImage: uiImage))
             } else if loader.didFail {
-                Image(fallbackAsset)
-                    .resizable()
-                    .aspectRatio(contentMode: contentMode)
+                renderedImage(Image(fallbackAsset))
             } else {
                 ZStack {
                     Color.clear
