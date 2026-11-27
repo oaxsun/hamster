@@ -133,7 +133,7 @@ struct TicketsView: View {
                                 Image(uiImage: TicketCountIconAsset.image)
                                     .resizable()
                                     .scaledToFit()
-                                    .frame(width: 30, height: 30)
+                                    .frame(width: 22.5, height: 22.5)
 
                                 Text("x\(max(ticketsVM.pages.count, 1))")
                                     .font(.system(size: 16, weight: .semibold))
