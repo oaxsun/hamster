@@ -13,6 +13,35 @@ iVBORw0KGgoAAAANSUhEUgAAAGAAAABcCAYAAACRILDuAAAaR0lEQVR42t1deZBcZ3H/9czosmzJWLIj
         }
         return image
     }()
+
+    static let tabImage: UIImage = {
+        let canvasSize = CGSize(width: 22, height: 22)
+        let renderer = UIGraphicsImageRenderer(size: canvasSize)
+
+        let rendered = renderer.image { _ in
+            let sourceSize = image.size
+            guard sourceSize.width > 0, sourceSize.height > 0 else { return }
+
+            let scale = min(
+                canvasSize.width / sourceSize.width,
+                canvasSize.height / sourceSize.height
+            )
+
+            let drawSize = CGSize(
+                width: sourceSize.width * scale,
+                height: sourceSize.height * scale
+            )
+
+            let origin = CGPoint(
+                x: (canvasSize.width - drawSize.width) / 2,
+                y: (canvasSize.height - drawSize.height) / 2
+            )
+
+            image.draw(in: CGRect(origin: origin, size: drawSize))
+        }
+
+        return rendered.withRenderingMode(.alwaysTemplate)
+    }()
 }
 
 
