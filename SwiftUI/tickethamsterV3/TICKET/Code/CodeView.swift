@@ -255,7 +255,8 @@ struct CodeView: View {
         OfflineCachedImage(
             urlString: page.barcodeUrl,
             fallbackAsset: "codeSample",
-            contentMode: .fit
+            contentMode: .fit,
+            stretchToFill: true
         )
     }
 
