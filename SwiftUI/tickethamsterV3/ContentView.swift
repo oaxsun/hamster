@@ -39,7 +39,8 @@ struct ContentView: View {
 
                 Events()
                     .tabItem {
-                        Image("events")
+                        Image(uiImage: TicketCountIconAsset.image)
+                            .renderingMode(.template)
                         Text("Mis boletos")
                     }
 
