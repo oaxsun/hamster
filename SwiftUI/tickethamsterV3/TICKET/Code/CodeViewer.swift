@@ -16,7 +16,7 @@ struct CodeViewer: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color(red: 0.055, green: 0.055, blue: 0.055).ignoresSafeArea()
 
             VStack(spacing: 0) {
                 header
@@ -85,7 +85,7 @@ struct CodeViewer: View {
         .padding(.horizontal, 18)
         .padding(.top, 8)
         .padding(.bottom, 8)
-        .background(Color.black)
+        .background(Color(red: 0.055, green: 0.055, blue: 0.055))
     }
 
     private var safeDisplayIndex: Int {
