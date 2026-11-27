@@ -19,7 +19,7 @@ struct CodeView: View {
                 .padding(.horizontal, 36)
                 .padding(.bottom, 14)
         }
-        .background(Color.black)
+        .background(Color(red: 0.055, green: 0.055, blue: 0.055))
         .fullScreenCover(isPresented: $showDetails) {
             Details(page: page)
         }
