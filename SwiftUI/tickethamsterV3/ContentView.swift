@@ -40,24 +40,21 @@ struct ContentView: View {
                 Image(systemName: selectedTab == 1 ? "bookmark.fill" : "bookmark")
                     .font(.system(size: 20, weight: .regular))
                     .frame(width: 27, height: 27)
+                    .foregroundStyle(selectedTab == 1 ? Color.blue : Color.white.opacity(0.72))
             }
 
             tabButton(index: 2, title: "Mis boletos") {
-                if selectedTab == 2 {
-                    Image(systemName: "rectangle.stack.fill")
-                        .font(.system(size: 20, weight: .regular))
-                        .frame(width: 27, height: 27)
-                } else {
-                    Image(uiImage: TicketCountIconAsset.tabImage)
-                        .renderingMode(.template)
-                        .frame(width: 27, height: 27)
-                }
+                Image(uiImage: TicketCountIconAsset.tabImage)
+                    .renderingMode(.template)
+                    .frame(width: 27, height: 27)
+                    .foregroundStyle(selectedTab == 2 ? Color.blue : Color.white.opacity(0.72))
             }
 
             tabButton(index: 3, title: "Mi cuenta") {
                 Image(systemName: selectedTab == 3 ? "person.crop.circle.fill" : "person.crop.circle")
                     .font(.system(size: 22, weight: .regular))
                     .frame(width: 27, height: 27)
+                    .foregroundStyle(selectedTab == 3 ? Color.blue : Color.white.opacity(0.72))
             }
         }
         .frame(height: 74)
@@ -75,11 +72,10 @@ struct ContentView: View {
         } label: {
             VStack(spacing: 5) {
                 icon()
-                    .foregroundStyle(selectedTab == index ? .white : .white.opacity(0.72))
 
                 Text(title)
                     .font(.system(size: 11.5, weight: selectedTab == index ? .semibold : .regular))
-                    .foregroundStyle(selectedTab == index ? .white : .white.opacity(0.62))
+                    .foregroundStyle(selectedTab == index ? Color.blue : .white.opacity(0.62))
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity)
